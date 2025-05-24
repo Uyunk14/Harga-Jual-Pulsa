@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kalkulator Pulsa Modern</title>
+  <style>
+    :root {
+      --primary: #4CAF50;
+      --background: #f5f7fa;
+      --card: #ffffff;
+      --text: #333;
+      --border: #ddd;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: var(--card);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--primary);
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: 500;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+
+    button {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      padding: 12px;
+      border: none;
+      font-size: 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #3e8e41;
+    }
+
+    pre {
+      background: #f0f2f5;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.95em;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Kalkulator Pulsa</h2>
+
+    <label>Harga Pulsa per 1.010.000</label>
+    <input type="number" id="harga" placeholder="Contoh: 930000" />
+
+    <label>Masukkan nominal pulsa yang akan dijual(pisahkan dengan koma):</label>
+    <input type="text" id="manual" placeholder="Contoh: 188000,290000, dst." />
+
+    <label>Markup (%):</label>
+    <input type="number" id="markup" placeholder="Contoh: 2/2.5" />
+
+    <button onclick="hitung()">Hitung</button>
+
+    <label>Modal/Tanpa Markup:</label>
+    <pre id="tanpaMarkup">Masukkan data dan klik "Hitung"</pre>
+
+    <label>Hasil Lengkap:</label>
+    <pre id="hasil"></pre>
+
+    <label>Harga Jual/MarkUp:</label>
+    <pre id="ringkas"></pre>
+  </div>
+
+  <script>
+    function getPotongan(n) {
+      if (n < 25000) return 1500;
+      else if (n < 50000) return 2000;
+      else if (n < 100000) return 2500;
+      else if (n <= 200000) return 4500;
+      else if (n <= 300000) return 6500;
+      else if (n <= 500000) return 8500;
+      else if (n <= 1000000) return 10500;
+      else return 0;
+    }
+
+    function formatRupiah(angka) {
+      return "Rp " + angka
+        .toFixed(2)
+        .replace(".", ",")
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function hitung() {
+      const harga = parseFloat(document.getElementById('harga').value);
+      const markup = parseFloat(document.getElementById('markup').value);
+      const manualInput = document.getElementById('manual').value;
+      const hasilElem = document.getElementById('hasil');
+      const ringkasElem = document.getElementById('ringkas');
+      const tanpaMarkupElem = document.getElementById('tanpaMarkup');
+
+      const nominalList = manualInput.split(',')
+        .map(n => parseInt(n.trim()))
+        .filter(n => !isNaN(n));
+
+      if (isNaN(harga) || isNaN(markup) || nominalList.length === 0) {
+        hasilElem.innerText = "Masukkan semua data dengan benar.";
+        ringkasElem.innerText = "";
+        tanpaMarkupElem.innerText = "";
+        return;
+      }
+
+      const hargaPer1000 = (harga / 1010000) * 1000;
+
+      let output = `Harga per 1.000: ${formatRupiah(hargaPer1000)}\nMarkup        : ${markup}%\n\n`;
+      let ringkas = "";
+      let tanpaMarkupOutput = "";
+      let totalAkhir = 0;
+      let totalTanpaMarkup = 0;
+
+      for (let n of nominalList) {
+        const potongan = getPotongan(n);
+        const nominalDibayar = n + potongan;
+        const hargaAsli = (nominalDibayar / 1000) * hargaPer1000;
+        const hargaAkhir = hargaAsli * (1 + markup / 100);
+
+        totalAkhir += hargaAkhir;
+        totalTanpaMarkup += hargaAsli;
+
+        tanpaMarkupOutput += `Pulsa ${n}: ${formatRupiah(hargaAsli)}\n`;
+        output += `Pulsa ${n} (+${potongan}): Harga = ${formatRupiah(hargaAkhir)}\n`;
+        ringkas += `Pulsa ${n}: ${formatRupiah(hargaAkhir)}\n`;
+      }
+
+      tanpaMarkupOutput += `\nTotal Harga Semua: ${formatRupiah(totalTanpaMarkup)}`;
+      output += `\nTotal Harga Semua: ${formatRupiah(totalAkhir)}`;
+      const totalKeuntungan = totalAkhir - totalTanpaMarkup;
+      ringkas += `\nTotal Keuntungan: ${formatRupiah(totalKeuntungan)}`;
+
+      tanpaMarkupElem.innerText = tanpaMarkupOutput;
+      hasilElem.innerText = output;
+      ringkasElem.innerText = ringkas;
+    }
+  </script>
+</body>
+</html>
