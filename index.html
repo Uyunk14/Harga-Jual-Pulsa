@@ -83,7 +83,7 @@
   <div class="container">
     <h2>Kalkulator Pulsa</h2>
 
-    <label>Harga Pulsa per 1.010.000</label>
+    <label>Harga Pulsa per 1.000.000</label>
     <input type="number" id="harga" placeholder="Contoh: 953000" />
 
     <label>Masukkan nominal pulsa yang akan dijual(pisahkan dengan koma):</label>
@@ -142,7 +142,7 @@
         return;
       }
 
-      const hargaPer1000 = (harga / 1010000) * 1000;
+      const hargaPer1000 = (harga / 1000000) * 1000;
 
       let output = `Harga per 1.000: ${formatRupiah(hargaPer1000)}\nMarkup        : ${markup}%\n\n`;
       let ringkas = "";
